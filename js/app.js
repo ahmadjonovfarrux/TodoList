@@ -5,8 +5,8 @@ const time = document.getElementById("time");
 const modal = document.getElementById("modal");
 const overlay = document.getElementById("overlay");
 const closeIcon = document.getElementById("close");
-// const deleteTodo = document.querySelector(".deleteTodo");
-// const messageCreate = document.getElementById("message-create");
+
+let editItemId;
 
 // time elements
 const fullDay = document.getElementById("full-day");
@@ -75,11 +75,13 @@ function showTodos() {
   listGroupTodo.innerHTML = " ";
   todos.forEach((item, i) => {
     listGroupTodo.innerHTML += `
-     <li class="list-group-item d-flex justify-content-between">
+     <li ondblclick="setCompleted(${i})" class="list-group-item d-flex justify-content-between ${
+      item.complated == true ? "complated" : ""
+    }">
          ${item.text}
           <div class="todos-icons">
             <span class="opacity-50 me-2">${item.time}</span>
-            <img
+            <img onClick=(editTodo(${i}))
               src="./images/edit.svg"
               alt="edit icon"
               width="25"
@@ -128,5 +130,69 @@ function deleteTodo(id) {
     return i !== id;
   });
 
-  console.log(deletedTodos);
+  todos = deletedTodos;
+  setTodos();
+  showTodos();
 }
+
+// setCompleted function
+function setCompleted(id) {
+  const completedTodos = todos.map((item, i) => {
+    if (id == i) {
+      return { ...item, complated: item.complated == true ? false : true };
+    } else {
+      return { ...item };
+    }
+  });
+  todos = completedTodos;
+  setTodos();
+  showTodos();
+}
+
+// edit Form
+formEdit.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const todoText = formEdit["input-edit"].value.trim();
+  formEdit.reset();
+  if (todoText.length) {
+    todos.splice(editItemId, 1, {
+      text: todoText,
+      time: getTime(),
+      complated: false,
+    });
+    setTodos();
+    showTodos();
+    close();
+  } else {
+    showMessage("message-edit", "Please enter some text");
+  }
+});
+
+// editTodo function
+function editTodo(id) {
+  open();
+  editItemId = id;
+}
+
+function open() {
+  modal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+}
+function close() {
+  modal.classList.add("hidden");
+  overlay.classList.add("hidden");
+}
+
+closeIcon.addEventListener("click", () => {
+  close();
+});
+
+overlay.addEventListener("click", () => {
+  close();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.which == 27) {
+    close();
+  }
+});
